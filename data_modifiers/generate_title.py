@@ -1,9 +1,9 @@
 import random
+from typing import Optional, List
 
 PERCENT_ADDED = 0.8
 PERCENT_MISTAKEN_PUNCTUATION = 0.03
 PERCENT_MODIFIED = 0.4
-# FILE_EXTENSIONS = [".txt", ".csv", ".jpg", ".pdf", "html", ".docx", ".xlsx", ".pptx", ".json", ".xml"]
 FILE_EXTENSIONS = [".txt", ".csv", ".jpg", ".html", ".json", ".xml"]
 MISTAKES = ["_", "-", "."]
 FILE_NAMES = [
@@ -52,7 +52,7 @@ def capitalized(str):
 MODIFIERS = [capitalized, cap_first] 
 
 
-def generate_title(available_extensions: list = None) -> str:
+def generate_title(available_extensions: Optional[List[str]]= None) -> str:
     """Generate a random file title with random modifications and mistakes."""
     
     # Use discovered template extensions if passed, otherwise fall back to default list
