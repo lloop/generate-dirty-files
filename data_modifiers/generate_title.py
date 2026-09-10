@@ -1,13 +1,11 @@
 import random
-from modifiers.capitals import capitalized, cap_first
-from modifiers.mistakes import mistake_punctuation
 
-MODIFIERS = [capitalized, cap_first] 
 PERCENT_ADDED = 0.8
 PERCENT_MISTAKEN_PUNCTUATION = 0.03
 PERCENT_MODIFIED = 0.4
 # FILE_EXTENSIONS = [".txt", ".csv", ".jpg", ".pdf", "html", ".docx", ".xlsx", ".pptx", ".json", ".xml"]
 FILE_EXTENSIONS = [".txt", ".csv", ".jpg", ".html", ".json", ".xml"]
+MISTAKES = ["_", "-", "."]
 FILE_NAMES = [
     "invoice",
     "photo",
@@ -32,8 +30,22 @@ ADDED = [
     "_draft",
 ]
 
-def generate_title():
+
+def cap_first(str):
+    return str.capitalize()
+
+def capitalized(str):
+    return str.upper()
+
+MODIFIERS = [capitalized, cap_first] 
+
+
+def generate_title(available_extensions: list = None) -> str:
     """Generate a random file title with random modifications and mistakes."""
+    
+    # Use discovered template extensions if passed, otherwise fall back to default list
+    extensions = available_extensions or FILE_EXTENSIONS
+    
     # Generate a random file name
     name = random.choice(FILE_NAMES)
     if random.random() < PERCENT_ADDED:
@@ -59,7 +71,20 @@ def generate_title():
         finished_name = full_name
             
     # Write the file
-    extension = random.choice(FILE_EXTENSIONS)
-    file_name = f"{finished_name}{extension}"
+    ext = random.choice(extensions)
+    file_name = f"{finished_name}{ext}"
     
     return file_name
+
+
+def mistake_punctuation(word: str) -> str:
+    """Add a random mistake punctuation to the word."""
+
+    mistake = random.choice(MISTAKES)
+    
+    # Pick a random insertion index (0 to length of string inclusive)
+    insert_pos = random.randint(0, len(word))
+
+    # Splice the character into the string
+    return word[:insert_pos] + mistake + word[insert_pos:]
+

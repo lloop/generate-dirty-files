@@ -1,4 +1,4 @@
 AMOUNT_OF_FILES = 20
 OUT_DIRECTORY = "output"
-
+TEMPLATES_DIRECTORY = "base_templates"
 

@@ -1,5 +1,6 @@
 # Session
 output/
+output_2/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

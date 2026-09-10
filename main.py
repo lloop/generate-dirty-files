@@ -1,7 +1,7 @@
 from pathlib import Path
 import shutil
 from config import OUT_DIRECTORY, AMOUNT_OF_FILES
-from data_dirtiers.generate_title import generate_title
+from data_modifiers.generate_title import generate_title
 
 # Create the output directory. delete previous output if it exists
 files = Path(OUT_DIRECTORY)
