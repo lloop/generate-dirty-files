@@ -8,7 +8,7 @@ from manifest_builder import ManifestLogger
 
 from config import OUT_DIRECTORY, TEMPLATES_DIRECTORY, AMOUNT_OF_FILES
 
-PERCENT_DUPLICATE = 0.2
+PERCENT_DUPLICATE = 0.05
 
 class MasterDataGenerator:
     def __init__(self, templates_dir: str = "base_templates"):
@@ -110,6 +110,7 @@ class MasterDataGenerator:
                 # Copy already mutated or clean file as duplicate
                 shutil.copyfile(dest_path, dup_path)
 
+                # Not sure I want this.
                 # 50% chance duplicate content gets additional corruption
                 # if random.random() < 0.5:
                 #     self.content_modifier(
