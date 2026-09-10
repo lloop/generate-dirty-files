@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archivePackage xmlns="http://example.org/schema/archival" version="2.4">
+    <metadataHeader>
+        <packageId>PKG-XML-2026-9901</packageId>
+        <exportTimestamp>2026-09-10T11:40:00Z</exportTimestamp>
+        <sourceSystem>Matarraña Distributed Collector</sourceSystem>
+        <recordCount>2</recordCount>
+    </metadataHeader>
+
+    <records>
+        <record id="REC-XML-001" status="active">
+            <entityDetails>
+                <title>Algars Basin Hydrology Report</title>
+                <category>Environmental Survey</category>
+                <jurisdiction>Arens de Lledó</jurisdiction>
+            </entityDetails>
+            <spatialData>
+                <latitude>40.9936</latitude>
+                <longitude>0.2721</longitude>
+                <elevationMeters>381</elevationMeters>
+            </spatialData>
+            <auditLog>
+                <entry timestamp="2026-03-01T08:16:40Z" user="system_crawler">Ingested binary document stream.</entry>
+                <entry timestamp="2026-03-02T10:12:05Z" user="admin_validator">Verified spatial boundary alignment.</entry>
+            </auditLog>
+        </record>
+
+        <record id="REC-XML-002" status="pending">
+            <entityDetails>
+                <title>Protohistoric Grain Storage Survey</title>
+                <category>Archaeological Site</category>
+                <jurisdiction>Mazaleón</jurisdiction>
+            </entityDetails>
+            <spatialData>
+                <latitude>41.0503</latitude>
+                <longitude>0.1342</longitude>
+                <elevationMeters>240</elevationMeters>
+            </spatialData>
+            <auditLog>
+                <entry timestamp="2026-03-01T08:36:12Z" user="system_crawler">Extracted DOM snapshot from remote host.</entry>
+            </auditLog>
+        </record>
+    </records>
+</archivePackage>

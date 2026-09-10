@@ -1,0 +1,74 @@
+{
+  "dataset_metadata": {
+    "collection_name": "Matarraña Regional Archives",
+    "batch_id": "BATCH-2026-09A",
+    "generated_at": "2026-09-10T11:30:00Z",
+    "total_records": 3,
+    "environment": "production_ingest"
+  },
+  "records": [
+    {
+      "record_id": "REC-001",
+      "entity": {
+        "name": "Historical Survey of Arens de Lledó",
+        "category": "Architectural History",
+        "location": {
+          "municipality": "Arens de Lledó",
+          "comarca": "Matarraña",
+          "coordinates": {
+            "latitude": 40.9936,
+            "longitude": 0.2721
+          }
+        }
+      },
+      "preservation_status": {
+        "is_digitized": true,
+        "quality_score": 0.94,
+        "access_level": "public"
+      },
+      "tags": ["medieval", "stone_masonry", "algars_river"]
+    },
+    {
+      "record_id": "REC-002",
+      "entity": {
+        "name": "Lledó Parish Records: 1890-1910",
+        "category": "Demographics",
+        "location": {
+          "municipality": "Lledó",
+          "comarca": "Matarraña",
+          "coordinates": {
+            "latitude": 40.9567,
+            "longitude": 0.2744
+          }
+        }
+      },
+      "preservation_status": {
+        "is_digitized": true,
+        "quality_score": 0.81,
+        "access_level": "restricted"
+      },
+      "tags": ["registry", "parish", "19th_century"]
+    },
+    {
+      "record_id": "REC-003",
+      "entity": {
+        "name": "Calaceite Trade Logs & Market Data",
+        "category": "Economic Records",
+        "location": {
+          "municipality": "Calaceite",
+          "comarca": "Matarraña",
+          "coordinates": {
+            "latitude": 41.0158,
+            "longitude": 0.1883
+          }
+        }
+      },
+      "preservation_status": {
+        "is_digitized": false,
+        "quality_score": null,
+        "access_level": "internal"
+      },
+      "tags": ["trade", "agriculture", "market"]
+    }
+  ]
+}
