@@ -19,6 +19,18 @@ FILE_NAMES = [
     "receipt",
     "project",
     "backup",
+    "proposal",
+    "agenda",
+    "timesheet",
+    "schedule",
+    "inventory",
+    "statement",
+    "memo",
+    "roster",
+    "summary",
+    "audit",
+    "brief",
+    "log",
 ]
 
 ADDED = [
