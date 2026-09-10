@@ -2,8 +2,10 @@ import os
 import random
 import shutil
 from pathlib import Path
+import uuid
+from data_modifiers.add_content import variate_template_content
 from data_modifiers.generate_title import generate_title
-from data_modifiers.alter_content import alter_content
+from data_modifiers.modify_content import modify_content
 from manifest_builder import ManifestLogger
 
 from config import OUT_DIRECTORY, TEMPLATES_DIRECTORY, AMOUNT_OF_FILES
@@ -15,7 +17,7 @@ class MasterDataGenerator:
 
         self.templates_dir = templates_dir
         self.title_generator = generate_title
-        self.content_modifier = alter_content 
+        self.content_modifier = modify_content 
 
         # Map available extensions to their template source file path
         self.template_map = self._load_templates()
@@ -88,10 +90,28 @@ class MasterDataGenerator:
             final_filename = self.title_generator(
                 available_extensions=[chosen_ext]
             )
+            
+            
 
             # 3. Copy base template content to destination output file
             dest_path = os.path.join(output_dir, final_filename)
-            shutil.copyfile(template_path, dest_path)
+                
+            # Check extension mode before reading
+            is_binary = chosen_ext.lower() in [".jpg", ".jpeg", ".png", ".gif", ".ico"]
+
+            if is_binary:
+                with open(template_path, "rb") as f:
+                    template_content = f.read()
+            else:
+                with open(template_path, "r", encoding="utf-8", errors="ignore") as f:
+                    template_content = f.read()
+
+            final_content = variate_template_content(template_content, chosen_ext)
+
+            write_mode = "wb" if is_binary else "w"
+            encoding = None if is_binary else "utf-8"
+            with open(dest_path, write_mode, encoding=encoding) as f:
+                f.write(final_content)
 
             # 4. Apply content corruption in-placemodifiers
             mutation_label = self.content_modifier(

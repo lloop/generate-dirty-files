@@ -23,7 +23,7 @@ MODIFIER_MAP = {
 }
 
 
-def alter_content(file_path: str) -> str:
+def modify_content(file_path: str) -> str:
     """Entry point for content alterations. Routes file paths to extension handlers."""
     if random.random() >= PERCENT_CORRUPTED:
         return "none"
