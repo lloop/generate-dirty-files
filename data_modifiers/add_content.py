@@ -1,5 +1,7 @@
 from pathlib import Path
 from typing import Union
+import uuid
+import json
 
 from .content_adders.csv_adder import CSVAdder
 from .content_adders.html_adder import HTMLAdder
@@ -57,35 +59,58 @@ class ContentVariator:
 
     def _variate_csv(self, text: str) -> str:
         lines = [line.strip() for line in text.splitlines() if line.strip()]
-        new_rows = self.csv_adder.generate_random_block(num_rows=4, include_header=False)
+        new_rows = self.csv_adder.generate_random_block(
+            num_rows=4, include_header=False
+        )
+
+        # Dynamic entropy value to guarantee unique SHA-256 binary hash
+        unique_id = uuid.uuid4().hex[:8]
+
         if not lines:
             header = "record_id,timestamp,user_email,department,amount,status"
-            return "\n".join([header] + new_rows) + "\n"
-        
+            return "\n".join([header] + new_rows) + f"\n# build_id,{unique_id}\n"
+
         header = lines[0]
         body = lines[1:] + new_rows
-        return "\n".join([header] + body) + "\n"
+
+        # Append a commented metadata row or append the ID to the last row
+        return "\n".join([header] + body) + f"\n# build_id,{unique_id}\n"
 
     def _variate_html(self, text: str) -> str:
         meta = self.html_adder._generate_meta_tag()
         section = self.html_adder._generate_synthetic_section()
+
+        # Dynamic entropy token to prevent deterministic hash collisions
+        unique_token = f"<!-- build_id: {uuid.uuid4().hex} -->"
+
         if "</head>" in text:
             text = text.replace("</head>", f"  {meta}\n</head>", 1)
         else:
             text = f"{meta}\n{text}"
+
         if "</body>" in text:
-            text = text.replace("</body>", f"{section}\n</body>", 1)
+            text = text.replace(
+                "</body>", f"{section}\n  {unique_token}\n</body>", 1
+            )
         else:
-            text += f"\n{section}"
+            text += f"\n{section}\n{unique_token}"
+
         return text
 
     def _variate_json(self, text: str) -> str:
-        import json
         try:
             data = json.loads(text) if text.strip() else {}
         except json.JSONDecodeError:
             data = {}
+
         data = self.json_adder._hydrate_and_rearrange_node(data)
+
+        # Ensure the root structure is a dict so we can inject metadata
+        if isinstance(data, dict):
+            data["_build_meta"] = {"uid": uuid.uuid4().hex[:8]}
+        elif isinstance(data, list):
+            data.append({"_build_meta": {"uid": uuid.uuid4().hex[:8]}})
+
         return json.dumps(data, indent=2)
 
     def _variate_py(self, text: str) -> str:

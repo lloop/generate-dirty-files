@@ -3,9 +3,9 @@ import random
 import shutil
 from pathlib import Path
 import argparse
-from data_modifiers.add_content import variate_template_content
+# from data_modifiers.add_content import variate_template_content
 from data_modifiers.generate_title import generate_title
-from data_modifiers.modify_content import modify_content
+from data_modifiers.modify_content import UnifiedModifier
 from manifest_builder import ManifestLogger
 
 from config import OUT_DIRECTORY, TEMPLATES_DIRECTORY, AMOUNT_OF_FILES
@@ -16,8 +16,10 @@ class MasterDataGenerator:
     def __init__(self, templates_dir: str = TEMPLATES_DIRECTORY):
         self.templates_dir = templates_dir
         self.title_generator = generate_title
-        self.content_modifier = modify_content 
+        # self.content_modifier = modify_content 
+        self.modifier = UnifiedModifier()
         self.template_map = self._load_templates()
+        self.modifier = UnifiedModifier()
 
     def _load_templates(self) -> dict:
         """
@@ -95,25 +97,25 @@ class MasterDataGenerator:
                 
             # Check extension mode before reading
             is_binary = chosen_ext.lower() in [".jpg", ".jpeg", ".png", ".gif", ".ico"]
-
-            if is_binary:
-                with open(template_path, "rb") as f:
-                    template_content = f.read()
-            else:
-                with open(template_path, "r", encoding="utf-8", errors="ignore") as f:
-                    template_content = f.read()
-
-            final_content = variate_template_content(template_content, chosen_ext)
-
+            read_mode = "rb" if is_binary else "r"
             write_mode = "wb" if is_binary else "w"
             encoding = None if is_binary else "utf-8"
+
+            # 1. Read base template
+            with open(template_path, read_mode, encoding=encoding, errors=None if is_binary else "ignore") as f:
+                template_content = f.read()
+
+            # 2. Transform in a single pass (Variation + Mutation + Unique Entropy)
+            final_content, mutation_label = self.modifier.transform(
+                content=template_content,
+                ext=chosen_ext,
+                is_binary=is_binary,
+                mutation_type="auto"
+            )
+
+            # 3. Write final content to disk ONCE
             with open(dest_path, write_mode, encoding=encoding) as f:
                 f.write(final_content)
-
-            # Apply content corruption in-placemodifiers
-            mutation_label = self.content_modifier(
-                dest_path
-            )
 
             generated_count += 1
 
