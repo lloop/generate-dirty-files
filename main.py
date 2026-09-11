@@ -79,18 +79,16 @@ class MasterDataGenerator:
 
         # for i in range(1, total_files + 1):
         while generated_count < total_files:
-            # 1. Randomly choose an extension from discovered base templates
+            # Randomly choose an extension from discovered base templates
             chosen_ext = random.choice(available_extensions)
             template_path = self.template_map[chosen_ext]
 
-            # 2. Generate a title with random alterations
+            # Generate a title with random alterations
             final_filename = self.title_generator(
                 available_extensions=[chosen_ext]
             )
             
-            
-
-            # 3. Copy base template content to destination output file
+            # Copy base template content to destination output file
             dest_path = os.path.join(output_dir, final_filename)
                 
             # Check extension mode before reading
@@ -110,14 +108,14 @@ class MasterDataGenerator:
             with open(dest_path, write_mode, encoding=encoding) as f:
                 f.write(final_content)
 
-            # 4. Apply content corruption in-placemodifiers
+            # Apply content corruption in-placemodifiers
             mutation_label = self.content_modifier(
                 dest_path
             )
 
             generated_count += 1
 
-            # 6. Duplicate (optionally creates duplicate files)
+            # Duplicate (optionally creates duplicate files)
             if generated_count < total_files and random.random() < PERCENT_DUPLICATE:
                 stem, ext = os.path.splitext(final_filename)
                 dup_suffix = random.choice(["_copy", " (1)", "_v2", "_backup"])
@@ -149,7 +147,7 @@ class MasterDataGenerator:
                     original_file=dest_path
                 )
                 
-            # 7. Log to manifest
+            # Log to manifest
             manifest.record_file(
                 final_filename=final_filename,
                 file_path=dest_path,
@@ -192,7 +190,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     corruptor = MasterDataGenerator()
-
     corruptor.generate_batch(
         output_dir=args.output,
         total_files=args.count
