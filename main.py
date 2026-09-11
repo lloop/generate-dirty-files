@@ -2,7 +2,7 @@ import os
 import random
 import shutil
 from pathlib import Path
-import uuid
+import argparse
 from data_modifiers.add_content import variate_template_content
 from data_modifiers.generate_title import generate_title
 from data_modifiers.modify_content import modify_content
@@ -13,13 +13,10 @@ from config import OUT_DIRECTORY, TEMPLATES_DIRECTORY, AMOUNT_OF_FILES
 PERCENT_DUPLICATE = 0.05
 
 class MasterDataGenerator:
-    def __init__(self, templates_dir: str = "base_templates"):
-
+    def __init__(self, templates_dir: str = TEMPLATES_DIRECTORY):
         self.templates_dir = templates_dir
         self.title_generator = generate_title
         self.content_modifier = modify_content 
-
-        # Map available extensions to their template source file path
         self.template_map = self._load_templates()
 
     def _load_templates(self) -> dict:
@@ -169,16 +166,34 @@ class MasterDataGenerator:
         manifest_file = manifest.save_manifest()
 
         print(
-            f"[✔] Batch generation complete: {generated_count} files generated, "
-            f"{duplicate_count} duplicates created."
-            f"Manifest written to: {manifest_file}"
+            f"--------------------------------------------------"
+            f"\nBatch generation complete: {generated_count} files generated, "
+            f"\n{duplicate_count} duplicates created."
+            f"\nManifest written to: {manifest_file}"
         )
 
 
 if __name__ == "__main__":
-    corruptor = MasterDataGenerator(templates_dir=TEMPLATES_DIRECTORY)
+    
+    # Add command line arguments for output_directory and amount_of_files
+    parser = argparse.ArgumentParser(description="Generate synthetic dirty dataset batches.")
+    parser.add_argument(
+        "-o", "--output",
+        type=str,
+        default=OUT_DIRECTORY,
+        help="Path to output directory (default: defined in config.py)"
+    )
+    parser.add_argument(
+        "-n", "--count",
+        type=int,
+        default=AMOUNT_OF_FILES,
+        help="Number of synthetic files to generate"
+    )
+    args = parser.parse_args()
+
+    corruptor = MasterDataGenerator()
 
     corruptor.generate_batch(
-        output_dir=OUT_DIRECTORY,
-        total_files=AMOUNT_OF_FILES
+        output_dir=args.output,
+        total_files=args.count
     )

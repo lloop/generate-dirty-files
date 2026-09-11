@@ -1,7 +1,7 @@
 import random
 from typing import Optional, List
 
-PERCENT_ADDED = 0.8
+PERCENT_ADDED = 0.35
 PERCENT_MISTAKEN_PUNCTUATION = 0.03
 PERCENT_MODIFIED = 0.4
 FILE_EXTENSIONS = [".txt", ".csv", ".jpg", ".html", ".json", ".xml"]
