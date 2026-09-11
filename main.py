@@ -88,8 +88,10 @@ class MasterDataGenerator:
                 available_extensions=[chosen_ext]
             )
             
-            # Copy base template content to destination output file
-            dest_path = os.path.join(output_dir, final_filename)
+            # Resolve unique destination path before writing
+            raw_dest_path = os.path.join(output_dir, final_filename)
+            dest_path = self._get_unique_path(raw_dest_path)
+            final_filename = os.path.basename(dest_path)
                 
             # Check extension mode before reading
             is_binary = chosen_ext.lower() in [".jpg", ".jpeg", ".png", ".gif", ".ico"]
@@ -120,7 +122,11 @@ class MasterDataGenerator:
                 stem, ext = os.path.splitext(final_filename)
                 dup_suffix = random.choice(["_copy", " (1)", "_v2", "_backup"])
                 dup_filename = f"{stem}{dup_suffix}{ext}"
-                dup_path = os.path.join(output_dir, dup_filename)
+                
+                # Resolve unique duplicate destination path before copying
+                raw_dup_path = os.path.join(output_dir, dup_filename)
+                dup_path = self._get_unique_path(raw_dup_path)
+                dup_filename = os.path.basename(dup_path)
 
                 # Copy already mutated or clean file as duplicate
                 shutil.copyfile(dest_path, dup_path)
@@ -170,6 +176,18 @@ class MasterDataGenerator:
             f"\nManifest written to: {manifest_file}"
         )
 
+    def _get_unique_path(self, dest_path: str) -> str:
+        """Ensures file writes never overwrite existing generated files."""
+        path = Path(dest_path)
+        if not path.exists():
+            return str(path)
+        
+        stem, ext = path.stem, path.suffix
+        counter = 1
+        while path.exists():
+            path = path.with_name(f"{stem}_{counter}{ext}")
+            counter += 1
+        return str(path)
 
 if __name__ == "__main__":
     
