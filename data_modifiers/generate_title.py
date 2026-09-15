@@ -63,7 +63,7 @@ def generate_title(available_extensions: Optional[List[str]]= None) -> str:
     if random.random() < PERCENT_ADDED:
         added = random.choice(ADDED)
         full_name = f"{name}{added}"
-        print(f"    [!] Introduced name addition ({PERCENT_ADDED*100}% hit): {name} -> {full_name}")        
+        # print(f"    [!] Introduced name addition ({PERCENT_ADDED*100}% hit): {name} -> {full_name}")        
     else:
         full_name = name
     
@@ -72,12 +72,12 @@ def generate_title(available_extensions: Optional[List[str]]= None) -> str:
         modifier = random.choice(MODIFIERS)
         pre_name = full_name
         full_name = modifier(full_name)
-        print(f"    [!] Introduced random modifier ({PERCENT_MODIFIED*100}% hit): {pre_name} -> {full_name}")        
+        # print(f"    [!] Introduced random modifier ({PERCENT_MODIFIED*100}% hit): {pre_name} -> {full_name}")        
         
     # Add a random mistake punctuation
     if random.random() < PERCENT_MISTAKEN_PUNCTUATION:
         mistaken = mistake_punctuation(full_name)
-        print(f"    [!] Introduced mistaken punctuation ({PERCENT_MISTAKEN_PUNCTUATION*100}% hit): {full_name} -> {mistaken}")
+        # print(f"    [!] Introduced mistaken punctuation ({PERCENT_MISTAKEN_PUNCTUATION*100}% hit): {full_name} -> {mistaken}")
         finished_name = mistaken
     else:
         finished_name = full_name

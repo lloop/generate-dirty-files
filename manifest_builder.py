@@ -17,7 +17,10 @@ class ManifestLogger:
         file_path: str,
         extension: str,
         source_template: str,
-        mutation_label: str,
+        corruption_label: str,
+        character_corruption_label: str,
+        extension_scrambled: bool = False,
+        original_extension: str = "none",
         is_duplicate: bool = False,
         original_file: str = "none"
     ) -> None:
@@ -26,12 +29,15 @@ class ManifestLogger:
 
         entry = {
             "filename": final_filename,
-            # "relative_path": os.path.relpath(file_path, self.output_dir),
             "extension": extension,
             "size_bytes": file_size,
             "source_template": os.path.basename(source_template),
-            "is_corrupted": mutation_label != "none",
-            "mutation_label": mutation_label,
+            "is_corrupted": corruption_label != "none",
+            "corruption_label": corruption_label,
+            "is_character_corrupted": character_corruption_label != "none",
+            "character_corruption_label": character_corruption_label,
+            "extension_scrambled": extension_scrambled,
+            "original_extension": original_extension,
             "is_duplicate": is_duplicate,
             "copied_from": os.path.basename(original_file) if original_file else None,
             "generated_at": datetime.now().isoformat()
@@ -45,6 +51,7 @@ class ManifestLogger:
         corrupted_count = sum(1 for r in self.records if r["is_corrupted"])
         clean_count = total_files - corrupted_count
         duplicated_count = sum(1 for r in self.records if r["is_duplicate"])
+        scrambled_count = sum(1 for r in self.records if r["extension_scrambled"])
 
         manifest_data = {
             "batch_metadata": {
@@ -52,8 +59,12 @@ class ManifestLogger:
                 "execution_duration_seconds": round((end_time - self.start_time).total_seconds(), 3),
                 "total_files": total_files,
                 "clean_files_count": clean_count,
+                "scrambled_extensions": scrambled_count,
+                "scrambled_rate": round(scrambled_count / total_files, 2) if total_files > 0 else 0.0,
                 "corrupted_files_count": corrupted_count,
                 "corruption_rate": round(corrupted_count / total_files, 2) if total_files > 0 else 0.0,
+                "character_corrupted_files_count": corrupted_count,
+                "character_corruption_rate": round(corrupted_count / total_files, 2) if total_files > 0 else 0.0,
                 "duplicated_files_count": duplicated_count,
                 "duplicated_rate": round(duplicated_count / total_files, 2) if total_files > 0 else 0.0
             },
