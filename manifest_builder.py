@@ -52,6 +52,11 @@ class ManifestLogger:
         clean_count = total_files - corrupted_count
         duplicated_count = sum(1 for r in self.records if r["is_duplicate"])
         scrambled_count = sum(1 for r in self.records if r["extension_scrambled"])
+        
+        file_type_counts = {}
+        for record in self.records:
+            extension = record["extension"]
+            file_type_counts[extension] = file_type_counts.get(extension, 0) + 1
 
         manifest_data = {
             "batch_metadata": {
@@ -66,7 +71,8 @@ class ManifestLogger:
                 "character_corrupted_files_count": corrupted_count,
                 "character_corruption_rate": round(corrupted_count / total_files, 2) if total_files > 0 else 0.0,
                 "duplicated_files_count": duplicated_count,
-                "duplicated_rate": round(duplicated_count / total_files, 2) if total_files > 0 else 0.0
+                "duplicated_rate": round(duplicated_count / total_files, 2) if total_files > 0 else 0.0,
+                "file_type_counts": file_type_counts
             },
             "files": self.records
         }
