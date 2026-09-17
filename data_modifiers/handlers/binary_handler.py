@@ -7,7 +7,7 @@ class BinaryHandler(BaseFormatHandler):
     def add_unique_entropy(self, content: str | bytes, token: str) -> bytes:
         raw_bytes = content.encode("utf-8") if isinstance(content, str) else content
         entropy_bytes = token.encode("utf-8")
-        return raw_bytes + b"\x00_build_uid:" + entropy_bytes
+        return raw_bytes + b"\n\x00_build_uid:" + entropy_bytes
 
     def corrupt_structure(
         self, content: str | bytes, mutation_type: str = "auto"

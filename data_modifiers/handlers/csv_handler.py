@@ -5,16 +5,8 @@ from .base import BaseFormatHandler
 class CSVHandler(BaseFormatHandler):
 
     def add_unique_entropy(self, content: str | bytes, token: str) -> str:
-        text = content.decode("utf-8") if isinstance(content, bytes) else content
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-
-        header = lines[0] if lines else "id,timestamp,data,status"
-        body = lines[1:] if len(lines) > 1 else []
-
-        body.append(f"rec_{token[:4]},{token[:6]},active_data,OK")
-        transformed = [header] + body
-        transformed.append(f"# build_id,{token}")
-        return "\n".join(transformed) + "\n"
+        text = content.decode("utf-8", errors="surrogateescape") if isinstance(content, bytes) else content
+        return text + f"\n# build_id,{token}\n"
 
     def corrupt_structure(
         self, content: str | bytes, mutation_type: str = "auto"

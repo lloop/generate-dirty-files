@@ -6,16 +6,8 @@ from .base import BaseFormatHandler
 class JSONHandler(BaseFormatHandler):
 
     def add_unique_entropy(self, content: str | bytes, token: str) -> str:
-        text = content.decode("utf-8") if isinstance(content, bytes) else content
-        try:
-            data = json.loads(text) if text.strip() else {}
-        except json.JSONDecodeError:
-            data = {}
-
-        if isinstance(data, dict):
-            data["_build_meta"] = token
-            return json.dumps(data, indent=2)
-        return json.dumps(data, indent=2)
+        text = content.decode("utf-8", errors="surrogateescape") if isinstance(content, bytes) else content
+        return text + f"\n// build_id: {token}\n"
 
     def corrupt_structure(
         self, content: str | bytes, mutation_type: str = "auto"

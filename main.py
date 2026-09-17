@@ -79,7 +79,7 @@ class MasterDataGenerator:
 
         generated_count = 0
         extension_scrambled_count = 0
-        corrupted_count = 0
+        structure_corrupted_count = 0
         character_corrupted_count = 0
         duplicate_count = 0
 
@@ -99,13 +99,16 @@ class MasterDataGenerator:
             template_path = self.template_map[chosen_ext]
 
             # Generate a title with random alterations
-            final_filename = self.title_generator(
+            raw_filename = self.title_generator(
                 available_extensions=[chosen_ext]
             )
 
             # Resolve unique destination path before writing
-            raw_dest_path = os.path.join(output_dir, final_filename)
+            raw_dest_path = os.path.join(output_dir, raw_filename)
             dest_path = self._get_unique_path(raw_dest_path)
+
+            # Update final_filename to match the true disk path after collision resolution
+            final_filename = os.path.basename(dest_path)
 
             # Check extension mode before reading
             is_binary = chosen_ext.lower() in [
@@ -141,7 +144,7 @@ class MasterDataGenerator:
             extension_scrambled = False
             if random.random() < PERCENT_EXTENSION_SCRAMBLE:
                 extension_scrambled = True
-                dest_path = scramble_extension(Path(dest_path))
+                dest_path = scramble_extension(Path(dest_path), available_extensions)
                 final_filename = os.path.basename(dest_path)
                 extension_scrambled_count += 1
 
@@ -151,17 +154,17 @@ class MasterDataGenerator:
             # Fetch the dedicated handler for this format
             handler = self.registry.get_handler(chosen_ext, is_binary=is_binary)
 
-            # Add Unique Entropy
-            file_record.content = handler.add_unique_entropy(
-                file_record.content, token=file_record.unique_token
-            )
+            # # Add Unique Entropy
+            # file_record.content = handler.add_unique_entropy(
+            #     file_record.content, token=file_record.unique_token
+            # )
 
             # Structural Corruption Pass
             mutation = (
                 "auto" if random.random() < PERCENT_CORRUPTION else "none"
             )
             if mutation == "auto":
-                corrupted_count += 1
+                structure_corrupted_count += 1
 
             file_record.content, corruption_label = handler.corrupt_structure(
                 file_record.content, mutation_type=mutation
@@ -177,6 +180,11 @@ class MasterDataGenerator:
                     )   
                     character_corrupted_count += 1
             file_record.character_mutation = char_label
+            
+            # Add Unique Entropy
+            file_record.content = handler.add_unique_entropy(
+                file_record.content, token=file_record.unique_token
+            )
 
             # Finalize SHA-256 and byte sizes before disk write
             file_record.finalize_content(file_record.content)
@@ -189,47 +197,10 @@ class MasterDataGenerator:
 
             generated_count += 1
 
-            # Duplicate file creation
-            if (
-                generated_count < total_files
-                and random.random() < PERCENT_DUPLICATE
-            ):
-                stem, ext = os.path.splitext(final_filename)
-                dup_suffix = random.choice(["_copy", " (1)", "_v2", "_backup"])
-                dup_filename = f"{stem}{dup_suffix}{ext}"
-
-                # Resolve unique duplicate destination path before copying
-                raw_dup_path = os.path.join(output_dir, dup_filename)
-                dup_path = self._get_unique_path(raw_dup_path)
-                dup_filename = os.path.basename(dup_path)
-
-                # Copy already mutated or clean file as duplicate
-                shutil.copyfile(dest_path, dup_path)
-
-                generated_count += 1
-                duplicate_count += 1
-                print(f"    [++] Created duplicate: {dup_filename}")
-
-                # Log the duplicate to manifest
-                manifest.record_file(
-                    final_filename=dup_filename,
-                    file_path=dup_path,
-                    extension=chosen_ext,
-                    source_template=template_path,
-                    corruption_label=corruption_label,
-                    character_corruption_label=char_label,
-                    extension_scrambled=extension_scrambled,
-                    original_extension=(
-                        chosen_ext if extension_scrambled else "none"
-                    ),
-                    is_duplicate=True,
-                    original_file=str_dest_path,
-                )
-
-            # Log to manifest
+            # Log primary generated file to manifest
             manifest.record_file(
                 final_filename=final_filename,
-                file_path=str_dest_path,
+                file_path=dest_path,
                 extension=chosen_ext,
                 source_template=template_path,
                 corruption_label=corruption_label,
@@ -241,6 +212,47 @@ class MasterDataGenerator:
                 is_duplicate=False,
                 original_file="none",
             )
+            
+            # Duplicate file creation
+            if (
+                generated_count < total_files
+                and random.random() < PERCENT_DUPLICATE
+            ):
+                # Abort duplicate creation if the original file is an intended 0-byte corruption
+                if os.path.exists(dest_path) and os.path.getsize(dest_path) == 0:
+                    print(f"    [!] Skipping duplicate pass: {final_filename} is an intended 0-byte corrupted file.")
+                else:
+                    stem, ext = os.path.splitext(final_filename)
+                    dup_suffix = random.choice(["_copy", " (1)", "_v2", "_backup"])
+                    dup_filename = f"{stem}{dup_suffix}{ext}"
+
+                    # Resolve unique duplicate destination path before copying
+                    raw_dup_path = os.path.join(output_dir, dup_filename)
+                    dup_path = self._get_unique_path(raw_dup_path)
+                    dup_filename = os.path.basename(dup_path)
+
+                    # Copy already mutated or clean file as duplicate
+                    shutil.copyfile(dest_path, dup_path)
+
+                    generated_count += 1
+                    duplicate_count += 1
+                    print(f"    [++] Created duplicate: {dup_filename}")
+
+                    # Log the valid duplicate to manifest
+                    manifest.record_file(
+                        final_filename=dup_filename,
+                        file_path=dup_path,
+                        extension=chosen_ext,
+                        source_template=template_path,
+                        corruption_label=corruption_label,
+                        character_corruption_label=char_label,
+                        extension_scrambled=extension_scrambled,
+                        original_extension=(
+                            chosen_ext if extension_scrambled else "none"
+                        ),
+                        is_duplicate=True,
+                        original_file=final_filename,
+                    )
 
             generated_paths.append(dest_path)
 
@@ -251,8 +263,8 @@ class MasterDataGenerator:
             f"--------------------------------------------------"
             f"\nBatch generation complete: {generated_count} files generated, "
             f"\n{extension_scrambled_count} scrambled extensions created."
-            f"\n{corrupted_count} corrupted structures created."
-            f"\n{character_corrupted_count} corrupted characters created."
+            f"\n{structure_corrupted_count} structure corrupted created."
+            f"\n{character_corrupted_count} character corrupted created."
             f"\n{duplicate_count} duplicates created."
             f"\nManifest written to: {manifest_file}"
         )
