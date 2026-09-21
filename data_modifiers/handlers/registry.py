@@ -4,6 +4,7 @@ from data_modifiers.handlers.csv_handler import CSVHandler
 from data_modifiers.handlers.fallback_handler import FallbackHandler
 from data_modifiers.handlers.json_handler import JSONHandler
 from data_modifiers.handlers.xml_handler import XMLHandler
+from data_modifiers.handlers.html_handler import HTMLHandler
 
 
 class HandlerRegistry:
@@ -13,7 +14,7 @@ class HandlerRegistry:
             ".json": JSONHandler(),
             ".csv": CSVHandler(),
             ".xml": XMLHandler(),
-            ".html": XMLHandler(),
+            ".html": HTMLHandler(),
             ".jpg": BinaryHandler(),
             ".png": BinaryHandler(),
         }

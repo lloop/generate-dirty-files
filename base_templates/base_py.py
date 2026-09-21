@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Baseline Python Template for Synthetic Data Pipeline Ingestion Testing."""
 
+# GENERATOR UNIQUE TOKEN: __UNIQUE_TOKEN__
+
 import json
 import logging
 from typing import Any, Dict

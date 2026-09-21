@@ -4,8 +4,10 @@
     "batch_id": "BATCH-2026-09A",
     "generated_at": "2026-09-10T11:30:00Z",
     "total_records": 3,
-    "environment": "production_ingest"
+    "environment": "production_ingest",
+    "_generator_unique_token": "__UNIQUE_TOKEN__"
   },
+
   "records": [
     {
       "record_id": "REC-001",
@@ -28,6 +30,7 @@
       },
       "tags": ["medieval", "stone_masonry", "algars_river"]
     },
+
     {
       "record_id": "REC-002",
       "entity": {
@@ -49,6 +52,7 @@
       },
       "tags": ["registry", "parish", "19th_century"]
     },
+
     {
       "record_id": "REC-003",
       "entity": {

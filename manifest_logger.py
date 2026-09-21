@@ -21,6 +21,7 @@ class ManifestLogger:
         file_path: str,
         extension: str,
         source_template: str,
+        unique_token: str,
         corruption_label: str,
         character_corruption_label: str,
         extension_scrambled: bool = False,
@@ -34,6 +35,7 @@ class ManifestLogger:
         entry = {
             "filename": final_filename,
             "extension": extension,
+            "unique_token": unique_token,
             "size_bytes": file_size,
             "source_template": os.path.basename(source_template),
             "is_structure_corrupted": corruption_label != "none",

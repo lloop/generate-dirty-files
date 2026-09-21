@@ -171,7 +171,16 @@ class MasterDataGenerator:
             
             # Add Unique Entropy
             file_record.content = handler.add_unique_entropy(
-                file_record.content, token=file_record.unique_token
+                file_record.content,
+                token=file_record.unique_token,
+                corruption_label=file_record.structural_mutation,
+            )
+            
+            # Temp
+            content_for_check = (
+                file_record.content.decode("utf-8", errors="surrogateescape")
+                if isinstance(file_record.content, bytes)
+                else file_record.content
             )
 
             # Finalize SHA-256 and byte sizes before disk write
@@ -189,6 +198,7 @@ class MasterDataGenerator:
                 file_path=str(dest_path),
                 extension=chosen_ext,
                 source_template=template_path,
+                unique_token=file_record.unique_token,
                 corruption_label=corruption_label,
                 character_corruption_label=char_label,
                 extension_scrambled=extension_scrambled,
@@ -229,6 +239,7 @@ class MasterDataGenerator:
                         file_path=dup_path,
                         extension=chosen_ext,
                         source_template=template_path,
+                        unique_token=file_record.unique_token,
                         corruption_label=corruption_label,
                         character_corruption_label=char_label,
                         extension_scrambled=extension_scrambled,

@@ -5,6 +5,7 @@
         <exportTimestamp>2026-09-10T11:40:00Z</exportTimestamp>
         <sourceSystem>Matarraña Distributed Collector</sourceSystem>
         <recordCount>2</recordCount>
+        <generatorUniqueToken>__UNIQUE_TOKEN__</generatorUniqueToken>
     </metadataHeader>
 
     <records>

@@ -4,7 +4,12 @@ from abc import ABC, abstractmethod
 class BaseFormatHandler(ABC):
 
     @abstractmethod
-    def add_unique_entropy(self, content: str | bytes, token: str) -> str | bytes:
+    def add_unique_entropy(
+        self,
+        content: str | bytes,
+        token: str,
+        corruption_label: str = "none",
+    ) -> str | bytes:
         """Injects format-valid token entropy into content."""
         pass
 

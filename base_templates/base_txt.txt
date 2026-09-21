@@ -30,6 +30,7 @@ structured notes regarding field observations along the Algars River basin.
 Checksum Status : VERIFIED
 Row Delimiters  : Standard CRLF / UNIX LF mixed
 Encoding        : UTF-8 Plain Text
+Generator Token : __UNIQUE_TOKEN__
 Notes           : Ensure text sanitization routines strip header bars before
                   pushing entity attributes to the relational datastore.
 

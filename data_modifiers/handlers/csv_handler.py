@@ -4,7 +4,12 @@ from .base import BaseFormatHandler
 
 class CSVHandler(BaseFormatHandler):
 
-    def add_unique_entropy(self, content: str | bytes, token: str) -> str:
+    def add_unique_entropy(
+        self,
+        content: str | bytes,
+        token: str,
+        corruption_label: str = "none",
+    ) -> str:
         text = content.decode("utf-8", errors="surrogateescape") if isinstance(content, bytes) else content
         return text + f"\n# build_id,{token}\n"
 
