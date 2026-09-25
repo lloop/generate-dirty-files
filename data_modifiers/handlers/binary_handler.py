@@ -10,18 +10,18 @@ class BinaryHandler(BaseFormatHandler):
         return raw_bytes + b"\n\x00_build_uid:" + entropy_bytes
 
     def corrupt_structure(
-        self, content: str | bytes, mutation_type: str = "auto"
+        self, content: str | bytes, corruption_type: str = "auto"
     ) -> tuple[bytes, str]:
         raw_bytes = content.encode("utf-8") if isinstance(content, str) else content
-        mutations = {
+        corruptions = {
             "flipped_bytes": lambda d: self._flip_random_byte(d),
             "truncated_binary": lambda d: d[: max(10, len(d) // 2)],
             "zero_byte": lambda d: b"",
         }
 
-        if mutation_type == "auto":
-            label = random.choice(list(mutations.keys()))
-            staged_data = mutations[label](raw_bytes)
+        if corruption_type == "auto":
+            label = random.choice(list(corruptions.keys()))
+            staged_data = corruptions[label](raw_bytes)
         else:
             label = "none"
             staged_data = raw_bytes

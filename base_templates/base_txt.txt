@@ -10,6 +10,7 @@ LOCATION TARGET   : Arens de Lledó, Matarraña Region
 --------------------------------------------------------------------------------
 1. EXECUTIVE SUMMARY
 --------------------------------------------------------------------------------
+CHARACTER_CORRUPTION_ZONE: "The quick brown fox jumps over the lazy dog."
 This document serves as a standardized text payload extracted from municipal 
 registers and local historical surveys. It contains unstructured and semi-
 structured notes regarding field observations along the Algars River basin.

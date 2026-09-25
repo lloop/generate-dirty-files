@@ -8,36 +8,29 @@ class FallbackHandler(BaseFormatHandler):
         self,
         content: str | bytes,
         token: str,
-        corruption_label: str = "none",
     ) -> str:
-        text = content.decode("utf-8", errors="surrogateescape") if isinstance(content, bytes) else content
-        return text + f"\n# build_id: {token}\n"
 
+        text = (
+            content.decode("utf-8", errors="surrogateescape")
+            if isinstance(content, bytes)
+            else content
+        )
+
+        return (
+            f"# DEBUG_START:{token}\n"
+            f"# DEBUG_END\n"
+            + text
+        )
+        
     def corrupt_structure(
-        self, content: str | bytes, mutation_type: str = "auto"
+        self, content: str | bytes, corruption_type: str = "auto"
     ) -> tuple[str, str]:
         text = content.decode("utf-8") if isinstance(content, bytes) else content
-        mutations = ["truncated_text", "zero_byte"]
+        corruptions = ["zero_byte"]
 
-        label = random.choice(mutations) if mutation_type == "auto" else "none"
-
-        token_start = text.find("# build_id:")
-        token_end = -1
-
-        if token_start != -1:
-            token_end = text.find("\n", token_start)
-
-            if token_end == -1:
-                token_end = len(text)
+        label = random.choice(corruptions) if corruption_type == "auto" else "none"
 
         if label == "zero_byte":
             return "", label
-        elif label == "truncated_text":
-            cut_point = max(10, len(text) // 2)
-
-            if token_start != -1 and cut_point >= token_start:
-                cut_point = max(10, token_start - 1)
-
-            return text[:cut_point], label
 
         return text, label

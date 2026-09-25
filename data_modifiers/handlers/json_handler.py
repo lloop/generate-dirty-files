@@ -33,8 +33,8 @@ class JSONHandler(BaseFormatHandler):
         self,
         content: str | bytes,
         token: str,
-        corruption_label: str = "none",
     ) -> str:
+
         text = (
             content.decode("utf-8", errors="surrogateescape")
             if isinstance(content, bytes)
@@ -44,27 +44,24 @@ class JSONHandler(BaseFormatHandler):
 
         try:
             data = json.loads(text, strict=False)
+
             if isinstance(data, dict):
                 data["_build_id"] = token
             elif isinstance(data, list):
                 data.append({"_build_id": token})
+
             return json.dumps(data, indent=2)
+
         except json.JSONDecodeError:
-            last_brace = text.rfind("}")
-
-            if last_brace != -1:
-                entropy = f', "_build_id": "{token}"'
-                return text[:last_brace] + entropy + text[last_brace:]
-
             return text
-
+        
     def corrupt_structure(
-        self, content: str | bytes, mutation_type: str = "auto"
+        self, content: str | bytes, corruption_type: str = "auto"
     ) -> tuple[str, str]:
         text = content.decode("utf-8") if isinstance(content, bytes) else content
-        mutations = ["unclosed_string", "missing_comma", "zero_byte"]
+        corruptions = ["unclosed_string", "missing_comma", "zero_byte"]
 
-        label = random.choice(mutations) if mutation_type == "auto" else "none"
+        label = random.choice(corruptions) if corruption_type == "auto" else corruption_type
 
         token_start = text.find('"_build_id"')
         token_end = -1
@@ -77,26 +74,29 @@ class JSONHandler(BaseFormatHandler):
 
         if label == "zero_byte":
             return "", label
+
         elif label == "unclosed_string":
+            if token_end != -1:
+                # Preserve _build_id, remove the closing JSON structure.
+                return text[:token_end], label
+
             cut_point = max(1, len(text) - 5)
-
-            if token_start != -1 and token_start <= cut_point < token_end:
-                cut_point = max(1, token_start - 1)
-
             return text[:cut_point], label
+
         elif label == "missing_comma":
-            if token_start != -1:
-                protected_start = token_start
-                protected_end = token_end
+            # Remove a comma from the actual JSON content, never from
+            # the protected _build_id field.
+            mutable_end = token_start if token_start != -1 else len(text)
+            before = text[:mutable_end]
 
-                before = text[:protected_start]
-                protected = text[protected_start:protected_end]
-                after = text[protected_end:]
+            comma_position = before.rfind(",")
 
-                after = after.replace(",", "", 1)
+            if comma_position != -1:
+                return (
+                    text[:comma_position] + text[comma_position + 1:],
+                    label,
+                )
 
-                return before + protected + after, label
-
-            return text.replace(",", "", 1), label
+            return text, "none"
 
         return text, label

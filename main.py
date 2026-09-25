@@ -100,11 +100,22 @@ class MasterDataGenerator:
                 available_extensions=[chosen_ext]
             )
 
-            # Resolve unique destination path before writing
+            # Build the initial destination path
             raw_dest_path = os.path.join(file_directory, raw_filename)
+
+            # Random extension scrambler
+            extension_scrambled = False
+            if random.random() < PERCENT_EXTENSION_SCRAMBLE:
+                extension_scrambled = True
+                raw_dest_path = scramble_extension(
+                    Path(raw_dest_path),
+                    available_extensions,
+                )
+
+            # Resolve uniqueness after the final extension is known
             dest_path = self._get_unique_path(raw_dest_path)
 
-            # Update final_filename to match the true disk path after collision resolution
+            # Update final_filename to match the true disk path
             final_filename = os.path.basename(dest_path)
 
             # Check extension mode before reading
@@ -137,51 +148,61 @@ class MasterDataGenerator:
                 is_binary=is_binary,
             )
 
-            # Random extension scrambler
-            extension_scrambled = False
-            if random.random() < PERCENT_EXTENSION_SCRAMBLE:
-                extension_scrambled = True
-                dest_path = scramble_extension(Path(dest_path), available_extensions)
-                final_filename = os.path.basename(dest_path)
-
+            # Update state
             file_record.output_filename = final_filename
             file_record.extension_scrambled = extension_scrambled
 
             # Fetch the dedicated handler for this format
             handler = self.registry.get_handler(chosen_ext, is_binary=is_binary)
-
-            # Structural Corruption Pass
-            mutation = (
-                "auto" if random.random() < PERCENT_STRUCT_CORRUPTION else "none"
-            )
-
-            file_record.content, corruption_label = handler.corrupt_structure(
-                file_record.content, mutation_type=mutation
-            )
-            file_record.structural_mutation = corruption_label
-
-            # Character Corruption Pass
-            char_label = "none"
-            if not is_binary and isinstance(file_record.content, str):
-                if random.random() < PERCENT_CHAR_CORRUPT:
-                    file_record.content, char_label = self.char_modifier.corrupt_character_encoding(
-                        file_record.content
-                    )   
-            file_record.character_mutation = char_label
             
             # Add Unique Entropy
             file_record.content = handler.add_unique_entropy(
                 file_record.content,
                 token=file_record.unique_token,
-                corruption_label=file_record.structural_mutation,
             )
+
+            # Structural Corruption Pass
+            structural_labels = []
+
+            corruption = (
+                "auto" if random.random() < PERCENT_STRUCT_CORRUPTION else "none"
+            )
+
+            file_record.content, corruption_label = handler.corrupt_structure(
+                file_record.content, corruption_type=corruption
+            )
+
+            if corruption_label != "none":
+                structural_labels.append(corruption_label)
+
+            file_record.structural_corruption = structural_labels
             
-            # Temp
-            content_for_check = (
-                file_record.content.decode("utf-8", errors="surrogateescape")
-                if isinstance(file_record.content, bytes)
-                else file_record.content
-            )
+            # Character Corruption Pass
+            char_label = "none"
+            char_labels = []
+
+            if not is_binary and isinstance(file_record.content, str):
+                if generated_count == 0:
+                    file_record.content, char_labels = (
+                        self.char_modifier.apply_test_corruptions(
+                            file_record.content
+                        )
+                    )
+
+                    print(f"TEST FILE: {final_filename}")
+                    print(f"FORCED CHARACTER CORRUPTIONS: {char_labels}")
+
+                elif random.random() < PERCENT_CHAR_CORRUPT:
+                    file_record.content, char_labels = (
+                        self.char_modifier.corrupt_character_encoding(
+                            file_record.content
+                        )
+                    )
+
+                    # if char_label != "none":
+                    #     char_labels.append(char_label)
+
+            file_record.character_corruption = char_labels
 
             # Finalize SHA-256 and byte sizes before disk write
             file_record.finalize_content(file_record.content)
@@ -196,11 +217,11 @@ class MasterDataGenerator:
             manifest.record_file(
                 final_filename=final_filename,
                 file_path=str(dest_path),
-                extension=chosen_ext,
+                extension=Path(final_filename).suffix.lower(),
                 source_template=template_path,
                 unique_token=file_record.unique_token,
-                corruption_label=corruption_label,
-                character_corruption_label=char_label,
+                structural_corruption=structural_labels,
+                character_corruption=char_labels,
                 extension_scrambled=extension_scrambled,
                 original_extension=(
                     chosen_ext if extension_scrambled else "none"
@@ -223,6 +244,7 @@ class MasterDataGenerator:
                     dup_suffix = random.choice(["_copy", " (1)", "_v2", "_backup"])
                     dup_filename = f"{stem}{dup_suffix}{ext}"
 
+    
                     # Resolve unique duplicate destination path before copying
                     raw_dup_path = os.path.join(file_directory, dup_filename)
                     dup_path = self._get_unique_path(raw_dup_path)
@@ -237,11 +259,11 @@ class MasterDataGenerator:
                     manifest.record_file(
                         final_filename=dup_filename,
                         file_path=dup_path,
-                        extension=chosen_ext,
+                        extension=Path(final_filename).suffix.lower(),
                         source_template=template_path,
                         unique_token=file_record.unique_token,
-                        corruption_label=corruption_label,
-                        character_corruption_label=char_label,
+                        structural_corruption=structural_labels,
+                        character_corruption=char_labels,
                         extension_scrambled=extension_scrambled,
                         original_extension=(
                             chosen_ext if extension_scrambled else "none"

@@ -37,7 +37,7 @@ CORE TECHNIQUES & CORRUPTION METHODS:
    - Mistaken punctuation: Random insertion of _, -, . into filenames
    - Examples: invoice_old.txt, BUDGET_copy.csv, photo-report.json
 
-2. CONTENT MUTATION:
+2. CONTENT CORRUPTION:
    - Random content alteration based on configurable corruption rates
    - Duplicate file generation with optional secondary corruption
    - In-place file modification to create realistic data degradation
@@ -62,7 +62,7 @@ main.py
 master_generator.py
   - Advanced batch generation engine
   - Class-based architecture (MasterDataCorruptor)
-  - Orchestrates template loading, filename generation, content mutation
+  - Orchestrates template loading, filename generation, content corruption
   - Supports duplicate file creation with chained corruption
   - Highly configurable with parameters for output location, file count, 
     and corruption rates
@@ -78,7 +78,7 @@ data_modifiers/
   - generate_title.py: Filename corruption and generation logic
     * Combines random file names with corruption modifications
     * Applies name additions, capitalization, and punctuation errors
-  - generate_content.py: Content mutation engine (primary content corruptor)
+  - generate_content.py: Content corruption engine (primary content corruptor)
 
 modifiers/
   - capitals.py: Capitalization-related modifications
@@ -113,7 +113,7 @@ master_generator.py:
   - templates_dir: Path to base templates directory
   - output_dir: Destination folder for generated files
   - total_files: Total number of files to create
-  - corruption_chance: Probability of content mutation (0.0-1.0)
+  - corruption_chance: Probability of content corruption (0.0-1.0)
   - duplicate_chance: Probability of creating duplicate files (0.0-1.0)
 
 

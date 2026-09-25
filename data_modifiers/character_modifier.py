@@ -1,26 +1,40 @@
 import random
 
 class CharacterModifier:
-    def corrupt_character_encoding(self, content: str) -> tuple[str, str]:
-        """
-        Introduces character encoding artifacts or corrupts string encoding.
-        """
+    
+    def corrupt_character_encoding(self, content: str) -> tuple[str, list[str]]:
         if not isinstance(content, str) or not content:
-            return content, "none"
+            return content, []
 
         corruptions = [
             self._corrupt_mojibake,
             self._corrupt_null_bytes,
             self._corrupt_replacement_chars,
         ]
-        chosen_func = random.choice(corruptions)
-        return chosen_func(content)
+
+        random.shuffle(corruptions)
+
+        for corruption in corruptions:
+            corrupted, label = corruption(content)
+
+            if label != "none" and corrupted != content:
+                return corrupted, [label]
+
+        return content, []
 
     def _corrupt_mojibake(self, content: str) -> tuple[str, str]:
         try:
-            # Simulate double-encoding artifact (UTF-8 bytes read as Windows-1252)
-            corrupted = content.encode("utf-8").decode("cp1252", errors="replace")
+            corrupted = (
+                content
+                .encode("utf-8")
+                .decode("cp1252", errors="replace")
+            )
+
+            if corrupted == content:
+                return content, "none"
+
             return corrupted, "mojibake"
+
         except Exception:
             return content, "none"
 
@@ -30,10 +44,55 @@ class CharacterModifier:
         return corrupted, "null_byte_injection"
 
     def _corrupt_replacement_chars(self, content: str) -> tuple[str, str]:
-        # Replace random characters with the Unicode replacement character
-        num_replacements = random.randint(1, min(5, max(1, len(content) // 20)))
-        content_list = list(content)
+        marker = "CHARACTER_CORRUPTION_ZONE:"
+
+        start = content.find(marker)
+
+        if start == -1:
+            return content, "none"
+
+        start += len(marker)
+
+        end = content.find("\n", start)
+
+        if end == -1:
+            end = len(content)
+
+        zone = content[start:end]
+
+        safe_indices = [
+            i for i, char in enumerate(zone)
+            if char.isalnum()
+        ]
+
+        if not safe_indices:
+            return content, "none"
+
+        num_replacements = random.randint(
+            1,
+            min(5, len(safe_indices))
+        )
+
+        zone_list = list(zone)
+
         for _ in range(num_replacements):
-            idx = random.randint(0, len(content_list) - 1)
-            content_list[idx] = "\ufffd"
-        return "".join(content_list), "unicode_replacement_char"
+            idx = random.choice(safe_indices)
+            zone_list[idx] = "\ufffd"
+
+        corrupted = (
+            content[:start]
+            + "".join(zone_list)
+            + content[end:]
+        )
+
+        return corrupted, "unicode_replacement_char"
+    
+    # Temp. Injecting multiple corruptions to test the lists
+    def apply_test_corruptions(
+        self,
+        content: str,
+    ) -> tuple[str, list[str]]:
+        content, label_1 = self._corrupt_null_bytes(content)
+        content, label_2 = self._corrupt_replacement_chars(content)
+
+        return content, [label_1, label_2]

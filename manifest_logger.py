@@ -22,8 +22,8 @@ class ManifestLogger:
         extension: str,
         source_template: str,
         unique_token: str,
-        corruption_label: str,
-        character_corruption_label: str,
+        structural_corruption: list[str],
+        character_corruption: list[str],
         extension_scrambled: bool = False,
         original_extension: str = "none",
         is_duplicate: bool = False,
@@ -38,10 +38,10 @@ class ManifestLogger:
             "unique_token": unique_token,
             "size_bytes": file_size,
             "source_template": os.path.basename(source_template),
-            "is_structure_corrupted": corruption_label != "none",
-            "structure_corruption_label": corruption_label,
-            "is_character_corrupted": character_corruption_label != "none",
-            "character_corruption_label": character_corruption_label,
+            "is_structure_corrupted": bool(structural_corruption),
+            "structure_corruption_label": structural_corruption,
+            "is_character_corrupted": bool(character_corruption),
+            "character_corruption_labels": character_corruption,
             "extension_scrambled": extension_scrambled,
             "original_extension": original_extension,
             "is_duplicate": is_duplicate,
@@ -57,10 +57,10 @@ class ManifestLogger:
         if record.get("extension_scrambled"):
             active_mods.append("extension_scrambled")
             
-        if record.get("structure_corruption_label") not in (None, "none", ""):
+        if record.get("structure_corruption_label"):
             active_mods.append("structure_corrupted")
             
-        if record.get("character_corruption_label") not in (None, "none", ""):
+        if record.get("character_corruption_labels"):
             active_mods.append("character_corrupted")
             
         if record.get("is_duplicate"):

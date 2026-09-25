@@ -56,10 +56,10 @@
     {
       "record_id": "REC-003",
       "entity": {
-        "name": "Calaceite Trade Logs & Market Data",
+        "name": "CHARACTER_CORRUPTION_ZONE: 'The quick brown fox jumps over the lazy dog.'",
         "category": "Economic Records",
         "location": {
-          "municipality": "Calaceite",
+          "municipality": "Arens de Lledó",
           "comarca": "Matarraña",
           "coordinates": {
             "latitude": 41.0158,

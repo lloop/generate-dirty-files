@@ -8,14 +8,13 @@ class BaseFormatHandler(ABC):
         self,
         content: str | bytes,
         token: str,
-        corruption_label: str = "none",
     ) -> str | bytes:
         """Injects format-valid token entropy into content."""
         pass
 
     @abstractmethod
     def corrupt_structure(
-        self, content: str | bytes, mutation_type: str = "auto"
+        self, content: str | bytes, corruption_type: str = "auto"
     ) -> tuple[str | bytes, str]:
         """Applies format-specific structural corruptions."""
         pass

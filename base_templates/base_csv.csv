@@ -1,8 +1,8 @@
 archive_id,timestamp,url,page_title,status_code,content_type,file_size_bytes,is_processed,checksum
-ARC-2026-001,2026-03-01T08:14:22Z,https://example.org/archive/matarranya_overview,Historical Survey of Arens de Lledo,200,text/html,48520,true,a1b2c3d4e5f67890
+ARC-2026-001,2026-03-01T08:14:22Z,https://example.org/archive/matarranya_overview,"CHARACTER_CORRUPTION_ZONE: ""The quick brown fox jumps over the lazy dog.""",200,text/html,48520,true,a1b2c3d4e5f67890
 ARC-2026-002,2026-03-01T08:15:05Z,https://example.org/archive/lledo_parish,Lledo Parish Records: 1890-1910,200,text/html,102400,true,b2c3d4e5f67890a1
 ARC-2026-003,2026-03-01T08:16:40Z,https://example.org/archive/algars_hydrology,Algars Basin Hydrology Report,200,application/pdf,2458900,false,c3d4e5f67890a1b2
-ARC-2026-004,2026-03-01T08:18:11Z,https://example.org/archive/calaceite_trade,Calaceite Trade Logs & Market Data,404,text/html,1240,false,d4e5f67890a1b2c3
+ARC-2026-004,2026-03-01T08:18:11Z,https://example.org/archive/calaceite_trade,Arens de Lledó Trade Logs & Market Data,404,text/html,1240,false,d4e5f67890a1b2c3
 ARC-2026-005,2026-03-01T08:20:00Z,https://example.org/archive/valderrobres_gate,Valderrobres Archival Imagery,200,image/jpeg,854120,true,e5f67890a1b2c3d4
 ARC-2026-006,2026-03-01T08:22:19Z,https://example.org/archive/beceite_maps,Topographic Maps of Beceite Pass,200,image/png,3120400,true,f67890a1b2c3d4e5
 ARC-2026-007,2026-03-01T08:25:33Z,https://example.org/archive/cretas_registry,Cretas Municipal Registry Excerpts,500,text/html,0,false,0000000000000000

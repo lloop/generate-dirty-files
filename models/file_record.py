@@ -20,9 +20,9 @@ class FileRecord:
     content: str | bytes = ""
     is_binary: bool = False
 
-    # Mutation Labels (Provenance Tracking)
-    structural_mutation: str = "none"
-    character_mutation: str = "none"
+    # Corruption Labels (Provenance Tracking)
+    structural_corruption: list[str] = field(default_factory=list)
+    character_corruption: list[str] = field(default_factory=list)
     extension_scrambled: bool = False
     is_duplicate: bool = False
 
@@ -52,9 +52,9 @@ class FileRecord:
             "output_extension": self.output_extension,
             "extension_mismatch": self.extension_scrambled,
             "is_duplicate": self.is_duplicate,
-            "mutations": {
-                "structural": self.structural_mutation,
-                "character_encoding": self.character_mutation,
+            "corruptions": {
+                "structural": self.structural_corruption,
+                "character_encoding": self.character_corruption,
             },
             "file_size_bytes": self.byte_size,
             "sha256": self.sha256_hash,

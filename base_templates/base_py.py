@@ -9,9 +9,11 @@ from typing import Any, Dict
 
 logging.basicConfig(level=logging.INFO)
 
+# Arens de Lledó
 
 def parse_payload(raw_data: str) -> Dict[str, Any]:
     """Parses raw payload data into a structured record."""
+    # CHARACTER_CORRUPTION_ZONE: "The quick brown fox jumps over the lazy dog."
     if not raw_data:
         raise ValueError("Payload input cannot be empty.")
 
