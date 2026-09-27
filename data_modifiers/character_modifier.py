@@ -23,53 +23,86 @@ class CharacterModifier:
         return content, []
 
     def _corrupt_mojibake(self, content: str) -> tuple[str, str]:
+        content, target, quote = self._get_corruption_target(content)
+
+        if not target:
+            return content, "none"
+
         try:
             corrupted = (
-                content
+                target
                 .encode("utf-8")
                 .decode("cp1252", errors="replace")
             )
 
-            if corrupted == content:
+            if corrupted == target:
                 return content, "none"
 
-            return corrupted, "mojibake"
+            marker = "CHARACTER_CORRUPTION_ZONE:"
+            start = content.find(marker)
+            value_start = start + len(marker)
+
+            while content[value_start].isspace():
+                value_start += 1
+
+            value_start += 1
+
+            value_end = content.find(quote, value_start)
+
+            corrupted_content = (
+                content[:value_start]
+                + corrupted
+                + content[value_end:]
+            )
+
+            return corrupted_content, "mojibake"
 
         except Exception:
             return content, "none"
-
+        
     def _corrupt_null_bytes(self, content: str) -> tuple[str, str]:
-        pos = random.randint(0, len(content) - 1)
-        corrupted = content[:pos] + "\x00" + content[pos:]
-        return corrupted, "null_byte_injection"
+        content, target, quote = self._get_corruption_target(content)
 
-    def _corrupt_replacement_chars(self, content: str) -> tuple[str, str]:
-        marker = "CHARACTER_CORRUPTION_ZONE:"
-
-        start = content.find(marker)
-
-        if start == -1:
+        if not target:
             return content, "none"
 
-        start += len(marker)
+        pos = random.randint(0, len(target))
 
-        end = content.find("\n", start)
+        corrupted_target = (
+            target[:pos]
+            + "\x00"
+            + target[pos:]
+        )
 
-        if end == -1:
-            end = len(content)
+        marker = "CHARACTER_CORRUPTION_ZONE:"
+        start = content.find(marker)
+        value_start = start + len(marker)
 
-        zone = content[start:end]
+        while content[value_start].isspace():
+            value_start += 1
 
-        safe_indices = []
-        inside_tag = False
+        value_start += 1
 
-        for i, char in enumerate(zone):
-            if char == "<":
-                inside_tag = True
-            elif char == ">":
-                inside_tag = False
-            elif not inside_tag and char.isalnum():
-                safe_indices.append(i)
+        value_end = content.find(quote, value_start)
+
+        corrupted_content = (
+            content[:value_start]
+            + corrupted_target
+            + content[value_end:]
+        )
+
+        return corrupted_content, "null_byte_injection"
+
+    def _corrupt_replacement_chars(self, content: str) -> tuple[str, str]:
+        content, target, quote = self._get_corruption_target(content)
+
+        if not target:
+            return content, "none"
+
+        safe_indices = [
+            i for i, char in enumerate(target)
+            if char.isalnum()
+        ]
 
         if not safe_indices:
             return content, "none"
@@ -84,15 +117,65 @@ class CharacterModifier:
             num_replacements
         )
 
-        zone_list = list(zone)
+        target_list = list(target)
 
         for idx in selected_indices:
-            zone_list[idx] = "\ufffd"
+            target_list[idx] = "\ufffd"
 
-        corrupted = (
-            content[:start]
-            + "".join(zone_list)
-            + content[end:]
+        corrupted_target = "".join(target_list)
+
+        marker = "CHARACTER_CORRUPTION_ZONE:"
+        start = content.find(marker)
+        value_start = start + len(marker)
+
+        while content[value_start].isspace():
+            value_start += 1
+
+        value_start += 1
+
+        value_end = content.find(quote, value_start)
+
+        corrupted_content = (
+            content[:value_start]
+            + corrupted_target
+            + content[value_end:]
         )
 
-        return corrupted, "unicode_replacement_char"
+        return corrupted_content, "unicode_replacement_char"
+
+    def _get_corruption_target(
+        self,
+        content: str,
+    ) -> tuple[str, str, str]:
+        marker = "CHARACTER_CORRUPTION_ZONE:"
+
+        start = content.find(marker)
+
+        if start == -1:
+            return content, "", ""
+
+        value_start = start + len(marker)
+
+        # Find the first quote after the marker.
+        while value_start < len(content) and content[value_start].isspace():
+            value_start += 1
+
+        if value_start >= len(content):
+            return content, "", ""
+
+        quote = content[value_start]
+
+        if quote not in ('"', "'"):
+            return content, "", ""
+
+        value_start += 1
+
+        # Find the closing quote.
+        value_end = content.find(quote, value_start)
+
+        if value_end == -1:
+            return content, "", ""
+
+        target = content[value_start:value_end]
+
+        return content, target, quote
