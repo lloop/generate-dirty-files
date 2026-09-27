@@ -114,8 +114,6 @@ class ManifestLogger:
             "combinations_breakdown": combo_summary,
         }
 
-
-
     def save_manifest(self, manifest_name: str = "manifest.json") -> str:
         """Calculates batch stats and writes the JSON manifest to the output directory."""
 

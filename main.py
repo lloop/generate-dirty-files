@@ -13,6 +13,7 @@ from config import (
     PERCENT_DUPLICATE,
     PERCENT_EXTENSION_SCRAMBLE,
     TEMPLATES_DIRECTORY,
+    PERCENT_DOUBLE_CORRUPT,
 )
 from data_modifiers.character_modifier import CharacterModifier
 from data_modifiers.extension_scrambler import scramble_extension
@@ -164,43 +165,47 @@ class MasterDataGenerator:
             # Structural Corruption Pass
             structural_labels = []
 
-            corruption = (
-                "auto" if random.random() < PERCENT_STRUCT_CORRUPTION else "none"
-            )
+            if random.random() < PERCENT_STRUCT_CORRUPTION:
+                file_record.content, corruption_label = handler.corrupt_structure(
+                    file_record.content,
+                    corruption_type="auto",
+                )
 
-            file_record.content, corruption_label = handler.corrupt_structure(
-                file_record.content, corruption_type=corruption
-            )
+                if corruption_label != "none":
+                    structural_labels.append(corruption_label)
 
-            if corruption_label != "none":
-                structural_labels.append(corruption_label)
+                # Second Structural Corruption
+                if random.random() < PERCENT_DOUBLE_CORRUPT:
+                    file_record.content, second_label = handler.corrupt_structure(
+                        file_record.content,
+                        corruption_type="auto",
+                    )
+
+                    if second_label != "none":
+                        structural_labels.append(second_label)
 
             file_record.structural_corruption = structural_labels
             
             # Character Corruption Pass
-            char_label = "none"
             char_labels = []
 
             if not is_binary and isinstance(file_record.content, str):
-                if generated_count == 0:
-                    file_record.content, char_labels = (
-                        self.char_modifier.apply_test_corruptions(
-                            file_record.content
-                        )
-                    )
-
-                    print(f"TEST FILE: {final_filename}")
-                    print(f"FORCED CHARACTER CORRUPTIONS: {char_labels}")
-
-                elif random.random() < PERCENT_CHAR_CORRUPT:
+                if random.random() < PERCENT_CHAR_CORRUPT:
                     file_record.content, char_labels = (
                         self.char_modifier.corrupt_character_encoding(
                             file_record.content
                         )
                     )
 
-                    # if char_label != "none":
-                    #     char_labels.append(char_label)
+                    # Second Character Corruption
+                    if random.random() < PERCENT_DOUBLE_CORRUPT:
+                        file_record.content, second_labels = (
+                            self.char_modifier.corrupt_character_encoding(
+                                file_record.content
+                            )
+                        )
+
+                        char_labels.extend(second_labels)
 
             file_record.character_corruption = char_labels
 
@@ -275,7 +280,7 @@ class MasterDataGenerator:
         # Save manifest.json to the output folder
         manifest.save_manifest()
 
-    def _get_unique_path(self, dest_path: str) -> str:
+    def _get_unique_path(self, dest_path: str | Path) -> str:
         """Ensures file writes never overwrite existing generated files."""
         path = Path(dest_path)
         if not path.exists():

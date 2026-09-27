@@ -43,9 +43,10 @@ class CSVHandler(BaseFormatHandler):
         malformed_row
         zero_byte
         
-        Need to dev out more, for example malformed quoting, 
-        inconsistent structure, truncated content, or invalid CSV syntax.
         '''
+        #  TODO Need to dev out more, for example malformed quoting, 
+        # inconsistent structure, truncated content, or invalid CSV syntax.
+        
         text = content.decode("utf-8") if isinstance(content, bytes) else content
         lines = [line.strip() for line in text.splitlines() if line.strip()]
 

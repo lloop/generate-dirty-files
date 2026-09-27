@@ -60,10 +60,16 @@ class CharacterModifier:
 
         zone = content[start:end]
 
-        safe_indices = [
-            i for i, char in enumerate(zone)
-            if char.isalnum()
-        ]
+        safe_indices = []
+        inside_tag = False
+
+        for i, char in enumerate(zone):
+            if char == "<":
+                inside_tag = True
+            elif char == ">":
+                inside_tag = False
+            elif not inside_tag and char.isalnum():
+                safe_indices.append(i)
 
         if not safe_indices:
             return content, "none"
@@ -73,10 +79,14 @@ class CharacterModifier:
             min(5, len(safe_indices))
         )
 
+        selected_indices = random.sample(
+            safe_indices,
+            num_replacements
+        )
+
         zone_list = list(zone)
 
-        for _ in range(num_replacements):
-            idx = random.choice(safe_indices)
+        for idx in selected_indices:
             zone_list[idx] = "\ufffd"
 
         corrupted = (
@@ -86,13 +96,3 @@ class CharacterModifier:
         )
 
         return corrupted, "unicode_replacement_char"
-    
-    # Temp. Injecting multiple corruptions to test the lists
-    def apply_test_corruptions(
-        self,
-        content: str,
-    ) -> tuple[str, list[str]]:
-        content, label_1 = self._corrupt_null_bytes(content)
-        content, label_2 = self._corrupt_replacement_chars(content)
-
-        return content, [label_1, label_2]
